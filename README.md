@@ -63,6 +63,9 @@ Fabric organizes prompts by real-world task, allowing people to create, collect,
 
 ## Updates
 
+For a deep dive into Fabric and its internals, read the documentation in the [docs folder](https://github.com/danielmiessler/Fabric/tree/main/docs). There is
+also the extremely useful and regularly updated [DeepWiki](https://deepwiki.com/danielmiessler/Fabric) for Fabric.
+
 <details>
 <summary>Click to view recent updates</summary>
 
@@ -74,6 +77,8 @@ Below are the **new features and capabilities** we've added (newest first):
 
 ### Recent Major Features
 
+- [v1.4.380](https://github.com/danielmiessler/fabric/releases/tag/v1.4.380) (Jan 15, 2026) — **Microsoft 365 Copilot Integration**: Added support for corporate Microsoft 365 Copilot, enabling enterprise users to leverage AI grounded in their organization's Microsoft 365 data (emails, documents, meetings.
+- [v1.4.378](https://github.com/danielmiessler/fabric/releases/tag/v1.4.378) (Jan 14, 2026) — **Digital Ocean GenAI Support**: Added support for Digital Ocean GenAI, along with a [guide for how to use it](./docs/DigitalOcean-Agents-Setup.md).
 - [v1.4.356](https://github.com/danielmiessler/fabric/releases/tag/v1.4.356) (Dec 22, 2025) — **Complete Internationalization**: Full i18n support for setup prompts across all 10 languages with intelligent environment variable handling—making Fabric truly accessible worldwide while maintaining configuration consistency.
 - [v1.4.350](https://github.com/danielmiessler/fabric/releases/tag/v1.4.350) (Dec 18, 2025) — **Interactive API Documentation**: Adds Swagger/OpenAPI UI at `/swagger/index.html` with comprehensive REST API documentation, enhanced developer guides, and improved endpoint discoverability for easier integration.
 - [v1.4.338](https://github.com/danielmiessler/fabric/releases/tag/v1.4.338) (Dec 4, 2025) — Add Abacus vendor support for Chat-LLM
@@ -160,6 +165,7 @@ Keep in mind that many of these were recorded when Fabric was Python-based, so r
     - [Docker](#docker)
     - [Environment Variables](#environment-variables)
     - [Setup](#setup)
+    - [Supported AI Providers](#supported-ai-providers)
     - [Per-Pattern Model Mapping](#per-pattern-model-mapping)
     - [Add aliases for all patterns](#add-aliases-for-all-patterns)
       - [Save your files in markdown using aliases](#save-your-files-in-markdown-using-aliases)
@@ -172,12 +178,15 @@ Keep in mind that many of these were recorded when Fabric was Python-based, so r
       - [Fish Completion](#fish-completion)
   - [Usage](#usage)
     - [Debug Levels](#debug-levels)
+    - [Dry Run Mode](#dry-run-mode)
     - [Extensions](#extensions)
   - [REST API Server](#rest-api-server)
+    - [Ollama Compatibility Mode](#ollama-compatibility-mode)
   - [Our approach to prompting](#our-approach-to-prompting)
   - [Examples](#examples)
   - [Just use the Patterns](#just-use-the-patterns)
     - [Prompt Strategies](#prompt-strategies)
+      - [Available Strategies](#available-strategies)
   - [Custom Patterns](#custom-patterns)
     - [Setting Up Custom Patterns](#setting-up-custom-patterns)
     - [Using Custom Patterns](#using-custom-patterns)
@@ -185,12 +194,14 @@ Keep in mind that many of these were recorded when Fabric was Python-based, so r
   - [Helper Apps](#helper-apps)
     - [`to_pdf`](#to_pdf)
     - [`to_pdf` Installation](#to_pdf-installation)
-    - [`code_helper`](#code_helper)
+    - [`code2context`](#code2context)
+    - [`generate_changelog`](#generate_changelog)
   - [pbpaste](#pbpaste)
   - [Web Interface (Fabric Web App)](#web-interface-fabric-web-app)
   - [Meta](#meta)
     - [Primary contributors](#primary-contributors)
     - [Contributors](#contributors)
+  - [💜 Support This Project](#-support-this-project)
 
 <br />
 
@@ -348,6 +359,44 @@ fabric --setup
 ```
 
 If everything works you are good to go.
+
+### Supported AI Providers
+
+Fabric supports a wide range of AI providers:
+
+**Native Integrations:**
+
+- OpenAI
+- Anthropic (Claude)
+- Google Gemini
+- Ollama (local models)
+- Azure OpenAI
+- Amazon Bedrock
+- Vertex AI
+- LM Studio
+- Perplexity
+
+**OpenAI-Compatible Providers:**
+
+- Abacus
+- AIML
+- Cerebras
+- DeepSeek
+- DigitalOcean
+- GitHub Models
+- GrokAI
+- Groq
+- Langdock
+- LiteLLM
+- MiniMax
+- Mistral
+- OpenRouter
+- SiliconCloud
+- Together
+- Venice AI
+- Z AI
+
+Run `fabric --setup` to configure your preferred provider(s), or use `fabric --listvendors` to see all available vendors.
 
 ### Per-Pattern Model Mapping
 
@@ -720,6 +769,16 @@ Use the `--debug` flag to control runtime logging:
 - `2`: detailed debugging
 - `3`: trace level
 
+### Dry Run Mode
+
+Use `--dry-run` to preview what would be sent to the AI model without making an API call:
+
+```bash
+echo "test input" | fabric --dry-run -p summarize
+```
+
+This is useful for debugging patterns, checking prompt construction, and verifying input formatting before using API credits.
+
 ### Extensions
 
 Fabric supports extensions that can be called within patterns. See the [Extension Guide](internal/plugins/template/Examples/README.md) for complete documentation.
@@ -744,6 +803,22 @@ The server provides endpoints for:
 - Configuration management
 
 For complete endpoint documentation, authentication setup, and usage examples, see [REST API Documentation](docs/rest-api.md).
+
+### Ollama Compatibility Mode
+
+Fabric can serve as a drop-in replacement for Ollama by exposing Ollama-compatible API endpoints. Start the server with:
+
+```bash
+fabric --serve --serveOllama
+```
+
+This enables the following Ollama-compatible endpoints:
+
+- `GET /api/tags` - List available patterns as models
+- `POST /api/chat` - Chat completions
+- `GET /api/version` - Server version
+
+Applications configured to use the Ollama API can point to your Fabric server instead, allowing you to use any of Fabric's supported AI providers through the Ollama interface. Patterns appear as models (e.g., `summarize:latest`).
 
 ## Our approach to prompting
 
@@ -825,6 +900,34 @@ LLM in the chat session.
 
 Use `fabric -S` and select the option to install the strategies in your `~/.config/fabric` directory.
 
+#### Available Strategies
+
+Fabric includes several prompt strategies:
+
+- `cot` - Chain-of-Thought: Step-by-step reasoning
+- `cod` - Chain-of-Draft: Iterative drafting with minimal notes (5 words max per step)
+- `tot` - Tree-of-Thought: Generate multiple reasoning paths and select the best one
+- `aot` - Atom-of-Thought: Break problems into smallest independent atomic sub-problems
+- `ltm` - Least-to-Most: Solve problems from easiest to hardest sub-problems
+- `self-consistent` - Self-Consistency: Multiple reasoning paths with consensus
+- `self-refine` - Self-Refinement: Answer, critique, and refine
+- `reflexion` - Reflexion: Answer, critique briefly, and provide refined answer
+- `standard` - Standard: Direct answer without explanation
+
+Use the `--strategy` flag to apply a strategy:
+
+```bash
+echo "Analyze this code" | fabric --strategy cot -p analyze_code
+```
+
+List all available strategies with:
+
+```bash
+fabric --liststrategies
+```
+
+Strategies are stored as JSON files in `~/.config/fabric/strategies/`. See the default strategies for the format specification.
+
 ## Custom Patterns
 
 You may want to use Fabric to create your own custom Patterns—but not share them with others. No problem!
@@ -904,9 +1007,9 @@ go install github.com/danielmiessler/fabric/cmd/to_pdf@latest
 
 Make sure you have a LaTeX distribution (like TeX Live or MiKTeX) installed on your system, as `to_pdf` requires `pdflatex` to be available in your system's PATH.
 
-### `code_helper`
+### `code2context`
 
-`code_helper` is used in conjunction with the `create_coding_feature` pattern.
+`code2context` is used in conjunction with the `create_coding_feature` pattern.
 It generates a `json` representation of a directory of code that can be fed into an AI model
 with instructions to create a new feature or edit the code in a specified way.
 
@@ -915,8 +1018,26 @@ See [the Create Coding Feature Pattern README](./data/patterns/create_coding_fea
 Install it first using:
 
 ```bash
-go install github.com/danielmiessler/fabric/cmd/code_helper@latest
+go install github.com/danielmiessler/fabric/cmd/code2context@latest
 ```
+
+### `generate_changelog`
+
+`generate_changelog` generates changelogs from git commit history and GitHub pull requests. It walks through your repository's git history, extracts PR information, and produces well-formatted markdown changelogs.
+
+```bash
+generate_changelog --help
+```
+
+Features include SQLite caching for fast incremental updates, GitHub GraphQL API integration for efficient PR fetching, and optional AI-enhanced summaries using Fabric.
+
+Install it using:
+
+```bash
+go install github.com/danielmiessler/fabric/cmd/generate_changelog@latest
+```
+
+See the [generate_changelog README](./cmd/generate_changelog/README.md) for detailed usage and options.
 
 ## pbpaste
 
@@ -977,3 +1098,13 @@ Made with [contrib.rocks](https://contrib.rocks).
 `fabric` was created by <a href="https://danielmiessler.com/subscribe" target="_blank">Daniel Miessler</a> in January of 2024.
 <br /><br />
 <a href="https://twitter.com/intent/user?screen_name=danielmiessler">![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/danielmiessler)</a>
+
+## 💜 Support This Project
+
+<div align="center">
+
+<img src="https://img.shields.io/badge/Sponsor-❤️-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white" alt="Sponsor">
+
+**I spend hundreds of hours a year on open source. If you'd like to help support this project, you can [sponsor me here](https://github.com/sponsors/danielmiessler). 🙏🏼**
+
+</div>

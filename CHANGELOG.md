@@ -1,5 +1,148 @@
 # Changelog
 
+## v1.4.382 (2026-01-17)
+
+### PR [#1941](https://github.com/danielmiessler/Fabric/pull/1941) by [ksylvan](https://github.com/ksylvan): Add `greybeard_secure_prompt_engineer` to metadata, also remove duplicate json data file
+
+- Add greybeard_secure_prompt_engineer pattern to metadata (pattern explanations and json index)
+- Refactor build process to use npm hooks for copying JSON files instead of manual copying
+- Update .gitignore to exclude generated data and tmp directories
+- Modify suggest_pattern categories to include new security pattern
+- Delete redundant web static data file and rely on build hooks
+
+## v1.4.381 (2026-01-17)
+
+### PR [#1940](https://github.com/danielmiessler/Fabric/pull/1940) by [ksylvan](https://github.com/ksylvan): Rewrite Ollama chat handler to support proper streaming responses
+
+- Refactor Ollama chat handler to support proper streaming responses with real-time SSE data parsing
+- Replace single-read body parsing with streaming bufio.Scanner approach and implement writeOllamaResponse helper function
+- Add comprehensive error handling improvements including proper HTTP error responses instead of log.Fatal to prevent server crashes
+- Fix upstream error handling to return stringified error payloads and validate Fabric chat URL hosts
+- Implement proper request context propagation and align duration fields to int64 nanosecond precision for consistency
+
+## v1.4.380 (2026-01-16)
+
+### PR [#1936](https://github.com/danielmiessler/Fabric/pull/1936) by [ksylvan](https://github.com/ksylvan): New Vendor: Microsoft Copilot
+
+- Add Microsoft 365 Copilot integration as a new AI vendor with OAuth2 authentication for delegated user permissions
+- Enable querying of Microsoft 365 data including emails, documents, and chats with both synchronous and streaming response support
+- Provide comprehensive setup instructions for Azure AD app registration and detail licensing, technical, and permission requirements
+- Add troubleshooting steps for common authentication and API errors with current API limitations documentation
+- Fix SendStream interface to use domain.StreamUpdate instead of chan string to match current Vendor interface requirements
+
+## v1.4.379 (2026-01-15)
+
+### PR [#1935](https://github.com/danielmiessler/Fabric/pull/1935) by [dependabot](https://github.com/apps/dependabot): chore(deps): bump the npm_and_yarn group across 1 directory with 2 updates
+
+- Updated @sveltejs/kit from version 2.21.1 to 2.49.5
+- Updated devalue dependency from version 5.3.2 to 5.6.2
+
+## v1.4.378 (2026-01-14)
+
+### PR [#1933](https://github.com/danielmiessler/Fabric/pull/1933) by [ksylvan](https://github.com/ksylvan): Add DigitalOcean Gradient AI support
+
+- Feat: add DigitalOcean Gradient AI Agents as a new vendor
+- Add DigitalOcean as a new AI provider in plugin registry
+- Implement DigitalOcean client with OpenAI-compatible inference endpoint
+- Support model access key authentication for inference requests
+- Add optional control plane token for model discovery
+
+### Direct commits
+
+- Chore: Update README with a links to other docs
+
+## v1.4.377 (2026-01-12)
+
+### PR [#1929](https://github.com/danielmiessler/Fabric/pull/1929) by [ksylvan](https://github.com/ksylvan): Add Mammouth as new OpenAI-compatible AI provider
+
+- Feat: add Mammouth as new OpenAI-compatible AI provider
+- Add Mammouth provider configuration with API base URL
+- Configure Mammouth to use standard OpenAI-compatible interface
+- Disable Responses API implementation for Mammouth provider
+- Add "Mammouth" to VSCode spell check dictionary
+
+## v1.4.376 (2026-01-12)
+
+### PR [#1928](https://github.com/danielmiessler/Fabric/pull/1928) by [ksylvan](https://github.com/ksylvan): Eliminate repetitive boilerplate across eight vendor implementations
+
+- Refactor: add NewVendorPluginBase factory function to reduce duplication
+- Update 8 vendor files (anthropic, bedrock, gemini, lmstudio, ollama, openai, perplexity, vertexai) to use the factory function
+- Add 3 test cases for the new factory function
+- Add centralized factory function for AI vendor plugin initialization
+- Chore: exempt json files from VSCode format-on-save
+
+### Direct commits
+
+- Docs: Add GitHub sponsor section to README
+I spend hundreds of hours a year on open source. If you'd like to help support this project, you can sponsor me here.
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+
+## v1.4.375 (2026-01-08)
+
+### PR [#1925](https://github.com/danielmiessler/Fabric/pull/1925) by [ksylvan](https://github.com/ksylvan): docs: update README to document new AI providers and features
+
+- Docs: update README to document new AI providers and features
+- List supported native and OpenAI-compatible AI provider integrations
+- Document dry run mode for previewing prompt construction
+- Explain Ollama compatibility mode for exposing API endpoints
+- Detail available prompt strategies like chain-of-thought and reflexion
+
+### PR [#1926](https://github.com/danielmiessler/Fabric/pull/1926) by [henricook](https://github.com/henricook) and [ksylvan](https://github.com/ksylvan): feat(vertexai): add dynamic model listing and multi-model support
+
+- Dynamic model listing from Vertex AI Model Garden API
+- Support for both Gemini (genai SDK) and Claude (Anthropic SDK) models
+- Curated Gemini model list with web search support for Gemini models
+- Thinking/extended thinking support for Gemini
+- TopP parameter support for Claude models
+
+## v1.4.374 (2026-01-05)
+
+### PR [#1924](https://github.com/danielmiessler/Fabric/pull/1924) by [ksylvan](https://github.com/ksylvan): Rename `code_helper` to `code2context` across documentation and CLI
+
+- Rename `code_helper` command to `code2context` throughout codebase
+- Update README.md table of contents and references
+- Update installation instructions with new binary name
+- Update all usage examples in main.go help text
+- Update create_coding_feature pattern documentation
+
+## v1.4.373 (2026-01-04)
+
+### PR [#1914](https://github.com/danielmiessler/Fabric/pull/1914) by [majiayu000](https://github.com/majiayu000): feat(code_helper): add stdin support for piping file lists
+
+- Added stdin support for piping file lists to code_helper, enabling commands like `find . -name '*.go' | code_helper "instructions"` and `git ls-files '*.py' | code_helper "Add type hints"`
+- Implemented automatic detection of stdin pipe mode with single argument (instructions) support
+- Enhanced tool to read file paths from stdin line by line while maintaining backward compatibility with existing directory scanning functionality
+
+### PR [#1915](https://github.com/danielmiessler/Fabric/pull/1915) by [majiayu000](https://github.com/majiayu000): feat: parallelize audio chunk transcription for improved performance
+
+- Parallelize audio chunk transcription using goroutines for improved performance
+
+## v1.4.372 (2026-01-04)
+
+### PR [#1913](https://github.com/danielmiessler/Fabric/pull/1913) by [majiayu000](https://github.com/majiayu000): fix: REST API /chat endpoint doesn't pass 'search' parameter to ChatOptions
+
+- Fix: REST API /chat endpoint now properly passes Search and SearchLocation parameters to ChatOptions
+
+## v1.4.371 (2026-01-04)
+
+### PR [#1923](https://github.com/danielmiessler/Fabric/pull/1923) by [ksylvan](https://github.com/ksylvan): ChangeLog Generation stability
+
+- Fix: improve date parsing and prevent early return when PR numbers exist
+- Add SQLite datetime formats to version date parsing logic
+- Loop through multiple date formats until one succeeds
+- Include SQLite fractional seconds format support
+- Prevent early return when version has PR numbers to output
+
+## v1.4.370 (2026-01-04)
+
+### PR [#1921](https://github.com/danielmiessler/Fabric/pull/1921) by [ksylvan](https://github.com/ksylvan): chore: remove redundant `--sync-db` step from changelog workflow
+
+- Remove redundant `--sync-db` step from changelog workflow
+- Remove duplicate database sync command from version workflow
+- Simplify changelog generation to single process-prs step
+- Clean up `heal_person` pattern by removing duplicate content sections
+- Remove duplicate IDENTITY, PURPOSE, STEPS, and OUTPUT INSTRUCTIONS from pattern file
+
 ## v1.4.369 (2026-01-04)
 
 ### PR [#1919](https://github.com/danielmiessler/Fabric/pull/1919) by [ksylvan](https://github.com/ksylvan): Fix the `last_pr_sync` setting during PR incoming processing
